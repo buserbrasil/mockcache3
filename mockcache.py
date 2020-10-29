@@ -145,20 +145,11 @@ MockcachedKeyNoneError: Key is None
 >>> mc.set(123, 123) #doctest: +IGNORE_EXCEPTION_DETAIL
 Traceback (most recent call last):
 MockcachedKeyTypeError: Key must be str()'s
->>> mc.set(u"a", 123) #doctest: +IGNORE_EXCEPTION_DETAIL
-Traceback (most recent call last):
-MockcachedKeyTypeError: Key must be str()'s, not unicode.
 >>> mc.set("a" * 251, 123) #doctest: +IGNORE_EXCEPTION_DETAIL
 Traceback (most recent call last):
 MockcachedKeyLengthError: Key length is > ...
 
 """
-
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-
 import datetime
 import copy
 import collections
@@ -293,11 +284,11 @@ class Client(object):
         self.dictionary[key] = val, time
         return 1
 
-    def set_multi(self, mapping, time=0, key_prefix=b''):
+    def set_multi(self, mapping, time=0, key_prefix=''):
         """Sets all the key-value pairs in `mapping`. If `key_prefix` is
         given, it is prepended to all keys in `mapping`."""
         for key, value in mapping.items():
-            self.set(b'{0}{1}'.format(key_prefix, key), value, time)
+            self.set(f'{key_prefix}{key}', value, time)
         return []
 
     def get(self, key):
@@ -313,7 +304,7 @@ class Client(object):
                 return
             return copy.deepcopy(val)
 
-    def get_multi(self, keys, key_prefix=b''):
+    def get_multi(self, keys, key_prefix=''):
         """Retrieves values of the `keys` at once from the internal
         dictionary. If `key_prefix` is given, it is prepended to all
         keys before retrieving them.
@@ -323,8 +314,7 @@ class Client(object):
         if not isinstance(keys, collections.Sequence):
             raise TypeError("object of type '{0}' has no len()".format(type(keys).__name__))
 
-        prefixed_keys = [(key, b'{0}{1}'.format(key_prefix, key))
-                         for key in keys]
+        prefixed_keys = [(key, f'{key_prefix}{key}') for key in keys]
         pairs = ((key, self.dictionary[prefixed])
                   for (key, prefixed) in prefixed_keys
                   if prefixed in dictionary)
