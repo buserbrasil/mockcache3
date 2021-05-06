@@ -152,7 +152,6 @@ MockcachedKeyLengthError: Key length is > ...
 """
 import datetime
 import copy
-import collections
 
 
 __author__ = "Hong Minhee <http://hongminhee.org/>"
@@ -310,10 +309,6 @@ class Client(object):
         keys before retrieving them.
         """
         dictionary = self.dictionary
-
-        if not isinstance(keys, collections.Sequence):
-            raise TypeError("object of type '{0}' has no len()".format(type(keys).__name__))
-
         prefixed_keys = [(key, f'{key_prefix}{key}') for key in keys]
         pairs = ((key, self.dictionary[prefixed])
                   for (key, prefixed) in prefixed_keys
