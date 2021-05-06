@@ -280,7 +280,7 @@ class Client(object):
             time = datetime.datetime.now() + datetime.timedelta(0, time)
         else:
             time = datetime.datetime.fromtimestamp(time)
-        self.dictionary[key] = val, time
+        self.dictionary[key] = copy.deepcopy(val), time
         return 1
 
     def set_multi(self, mapping, time=0, key_prefix=''):
