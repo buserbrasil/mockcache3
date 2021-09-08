@@ -148,6 +148,12 @@ MockcachedKeyTypeError: Key must be str()'s
 >>> mc.set("a" * 251, 123) #doctest: +IGNORE_EXCEPTION_DETAIL
 Traceback (most recent call last):
 MockcachedKeyLengthError: Key length is > ...
+>>> mc.get_multi([123]) #doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+MockcachedKeyTypeError: Key must be str()'s
+>>> mc.set_multi({123: 123}) #doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+MockcachedKeyTypeError: Key must be str()'s
 
 """
 import datetime
@@ -205,6 +211,7 @@ class Client(object):
 
     def delete(self, key, time=0):
         """Deletes the `key` from the dictionary."""
+        check_key(key)
         if key in self.dictionary:
             if int(time) < 1:
                 del self.dictionary[key]
@@ -214,6 +221,7 @@ class Client(object):
 
     def incr(self, key, delta=1):
         """Increments an integer by the `key`."""
+        check_key(key)
         try:
             value, exp = self.dictionary[key]
         except KeyError:
@@ -232,6 +240,7 @@ class Client(object):
         It works only when there is the key already.
 
         """
+        check_key(key)
         try:
             self.dictionary[key] = str(self.dictionary[key][0]) + val, \
                                    self.dictionary[key][1]
@@ -245,6 +254,7 @@ class Client(object):
         It works only when there is the key already.
 
         """
+        check_key(key)
         try:
             self.dictionary[key] = val + str(self.dictionary[key][0]), \
                                    self.dictionary[key][1]
@@ -258,6 +268,7 @@ class Client(object):
         but it stores the value only when the `key` doesn't exist already.
 
         """
+        check_key(key)
         if key in self.dictionary:
             return 0
         return self.set(key, val, time)
@@ -267,6 +278,7 @@ class Client(object):
         but it store the value only when the `key` already exists.
 
         """
+        check_key(key)
         if key not in self.dictionary:
             return 0
         return self.set(key, val, time)
@@ -287,6 +299,7 @@ class Client(object):
         """Sets all the key-value pairs in `mapping`. If `key_prefix` is
         given, it is prepended to all keys in `mapping`."""
         for key, value in mapping.items():
+            check_key(key)
             self.set(f'{key_prefix}{key}', value, time)
         return []
 
@@ -308,14 +321,20 @@ class Client(object):
         dictionary. If `key_prefix` is given, it is prepended to all
         keys before retrieving them.
         """
-        dictionary = self.dictionary
-        prefixed_keys = [(key, f'{key_prefix}{key}') for key in keys]
-        pairs = ((key, self.dictionary[prefixed])
-                  for (key, prefixed) in prefixed_keys
-                  if prefixed in dictionary)
-        now = datetime.datetime.now
-        return dict((key, copy.deepcopy(value)) for key, (value, exp) in pairs
-                                                if not exp or exp > now())
+        pairs = {}
+        for key in keys:
+            check_key(key)
+            prefixed_key = f'{key_prefix}{key}'
+            try:
+                value, exptime = self.dictionary[prefixed_key]
+            except KeyError:
+                pass
+            else:
+                if exptime and exptime < datetime.datetime.now():
+                    del self.dictionary[prefixed_key]
+                    continue
+                pairs[key] = copy.deepcopy(value)
+        return pairs
 
     def delete_multi(self, keys):
         """Deletes the `keys` from the dictionary
@@ -323,6 +342,7 @@ class Client(object):
         """
         result = True
         for key in keys:
+            check_key(key)
             result = result and self.delete(key)
         return result
 
