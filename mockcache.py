@@ -156,9 +156,8 @@ Traceback (most recent call last):
 MockcachedKeyTypeError: Key must be str()'s
 
 """
-import datetime
 import copy
-
+import datetime
 
 __author__ = "Hong Minhee <http://hongminhee.org/>"
 __maintainer__ = __author__
@@ -169,7 +168,7 @@ __version__ = "1.0.3_alpha"
 
 
 SERVER_MAX_KEY_LENGTH = 250
-SERVER_MAX_VALUE_LENGTH = 1024*1024
+SERVER_MAX_VALUE_LENGTH = 1024 * 1024
 
 
 class Client(object):
@@ -183,14 +182,19 @@ class Client(object):
     # exceptions for Client
     class MockcachedKeyError(Exception):
         pass
+
     class MockcachedKeyLengthError(MockcachedKeyError):
         pass
+
     class MockcachedKeyCharacterError(MockcachedKeyError):
         pass
+
     class MockcachedKeyNoneError(MockcachedKeyError):
         pass
+
     class MockcachedKeyTypeError(MockcachedKeyError):
         pass
+
     class MockcachedStringEncodingError(Exception):
         pass
 
@@ -242,8 +246,10 @@ class Client(object):
         """
         check_key(key)
         try:
-            self.dictionary[key] = str(self.dictionary[key][0]) + val, \
-                                   self.dictionary[key][1]
+            self.dictionary[key] = (
+                str(self.dictionary[key][0]) + val,
+                self.dictionary[key][1],
+            )
         except KeyError:
             return 0
         else:
@@ -256,8 +262,10 @@ class Client(object):
         """
         check_key(key)
         try:
-            self.dictionary[key] = val + str(self.dictionary[key][0]), \
-                                   self.dictionary[key][1]
+            self.dictionary[key] = (
+                val + str(self.dictionary[key][0]),
+                self.dictionary[key][1],
+            )
         except KeyError:
             return 0
         else:
@@ -295,12 +303,12 @@ class Client(object):
         self.dictionary[key] = copy.deepcopy(val), time
         return 1
 
-    def set_multi(self, mapping, time=0, key_prefix=''):
+    def set_multi(self, mapping, time=0, key_prefix=""):
         """Sets all the key-value pairs in `mapping`. If `key_prefix` is
         given, it is prepended to all keys in `mapping`."""
         for key, value in mapping.items():
             check_key(key)
-            self.set(f'{key_prefix}{key}', value, time)
+            self.set(f"{key_prefix}{key}", value, time)
         return []
 
     def get(self, key):
@@ -316,7 +324,7 @@ class Client(object):
                 return
             return copy.deepcopy(val)
 
-    def get_multi(self, keys, key_prefix=''):
+    def get_multi(self, keys, key_prefix=""):
         """Retrieves values of the `keys` at once from the internal
         dictionary. If `key_prefix` is given, it is prepended to all
         keys before retrieving them.
@@ -324,7 +332,7 @@ class Client(object):
         pairs = {}
         for key in keys:
             check_key(key)
-            prefixed_key = f'{key_prefix}{key}'
+            prefixed_key = f"{key_prefix}{key}"
             try:
                 value, exptime = self.dictionary[prefixed_key]
             except KeyError:
@@ -337,9 +345,7 @@ class Client(object):
         return pairs
 
     def delete_multi(self, keys):
-        """Deletes the `keys` from the dictionary
-
-        """
+        """Deletes the `keys` from the dictionary."""
         result = True
         for key in keys:
             check_key(key)
@@ -363,10 +369,10 @@ class Client(object):
 
 def check_key(key, key_extra_len=0):
     """Checks sanity of key. Fails if:
-        Key length is > SERVER_MAX_KEY_LENGTH (Raises MockcachedKeyLengthError).
-        Contains control characters  (Raises MockcachedKeyCharacterError).
-        Is not a string (Raises MockcachedKeyTypeError)
-        Is None (Raises MockcachedKeyNoneError)
+    Key length is > SERVER_MAX_KEY_LENGTH (Raises MockcachedKeyLengthError).
+    Contains control characters  (Raises MockcachedKeyCharacterError).
+    Is not a string (Raises MockcachedKeyTypeError)
+    Is None (Raises MockcachedKeyNoneError)
     """
     if type(key) == tuple:
         key = key[1]
@@ -376,9 +382,9 @@ def check_key(key, key_extra_len=0):
         raise Client.MockcachedKeyTypeError("Key must be str()'s")
 
     if len(key) + key_extra_len > SERVER_MAX_KEY_LENGTH:
-         raise Client.MockcachedKeyLengthError("Key length is > %s" % \
-                                                 SERVER_MAX_KEY_LENGTH)
+        raise Client.MockcachedKeyLengthError(
+            "Key length is > %s" % SERVER_MAX_KEY_LENGTH
+        )
     for char in key:
         if ord(char) < 33 or ord(char) == 127:
-            raise Client.MockcachedKeyCharacterError("Control characters not "
-                                                     "allowed")
+            raise Client.MockcachedKeyCharacterError("Control characters not allowed")
