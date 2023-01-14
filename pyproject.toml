@@ -2,7 +2,7 @@
 name = "mockcache"
 version = "0.0.0"
 description = "The Python dictionary-based mock memcached client library."
-authors = ["Hong Minhee <http://hongminhee.org/>"]
+authors = ["Hong Minhee"]
 maintainers = ["Iuri de Silvio <iurisilvio@gmail.com>"]
 readme = "README.md"
 classifiers = [
